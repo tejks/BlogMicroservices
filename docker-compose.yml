@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  postsapi:
+    image: ${DOCKER_REGISTRY-}postsapi
+    build:
+      context: .
+      dockerfile: PostsAPI/Dockerfile
+    environment:
+     MONGO_URI: mongodb://mongo_db:27017
+    depends_on:
+     - mongo_db
+
+  commentsapi:
+    image: ${DOCKER_REGISTRY-}commentsapi
+    build:
+      context: .
+      dockerfile: CommentsAPI/Dockerfile
+    environment:
+     MONGO_URI: mongodb://mongo_db:27017
+    depends_on:
+     - mongo_db
+
+  mongo_db:
+   container_name: db_container
+   image: mongo:latest
+   restart: always
+   ports:
+      - '27018:27017'
+   volumes:
+      - mongo_db:/data/db
+
+volumes:
+  mongo_db: {}
