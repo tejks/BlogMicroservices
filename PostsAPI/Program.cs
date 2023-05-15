@@ -6,6 +6,11 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using PostsAPI.AsyncDataServices.Grpc.Client;
+using AutoMapper;
+using Amazon.Runtime.Internal.Util;
+using static System.Net.Mime.MediaTypeNames;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +19,7 @@ builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGrpcCommentClient, GrpcCommentClient>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -59,7 +65,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
