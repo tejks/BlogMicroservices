@@ -60,7 +60,7 @@ namespace PostsAPI.Controllers
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 Title = postDto.Title,
-                Text = "Data",
+                Text = postDto.Text,
                 CreatedDate = DateTimeOffset.UtcNow
             };
 
@@ -80,10 +80,10 @@ namespace PostsAPI.Controllers
 
             var newPost = new Post
             {
-                Id = id,
+                Id = postItem.Id,
                 Title = postDTO.Title,
                 Text = postDTO.Text,
-                CreatedDate = DateTimeOffset.UtcNow
+                CreatedDate = postItem.CreatedDate
             };
 
             try
@@ -118,6 +118,7 @@ namespace PostsAPI.Controllers
                Id = postItem.Id,
                Title= postItem.Title,
                Text = postItem.Text,
+               UserId = postItem.UserId,
                CreatedDate = postItem.CreatedDate
            };
         }
