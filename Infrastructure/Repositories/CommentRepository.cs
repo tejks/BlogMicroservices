@@ -40,6 +40,11 @@ public class CommentRepository : ICommentRepository
         return await commentsCollection.Find(new BsonDocument()).ToListAsync();
     }
 
+    public  IEnumerable<Comment> GetCommentsSync()
+    {
+        return commentsCollection.Find(new BsonDocument()).ToList();
+    }
+
     public async Task UpdateCommentAsync(Comment comment)
     {
         var filter = filterBuilder.Eq(existingComment => existingComment.Id, comment.Id);
