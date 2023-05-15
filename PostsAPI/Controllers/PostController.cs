@@ -2,7 +2,7 @@
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using PostsAPI.AsyncDataServices.Grpc.Client;
-using PostsAPI.Dto;
+using PostsAPI.Dto.Post;
 
 namespace PostsAPI.Controllers
 {
@@ -23,14 +23,22 @@ namespace PostsAPI.Controllers
             _grpc = grpc;
         }
 
-        [HttpGet(Name = "GetPosts")]
-        public async Task<IEnumerable<Post>> Get()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetPosts()
         {
-            return await _context.GetPostsAsync();
+            return (await _context.GetPostsAsync()).Select(x => ItemToDTO(x)).ToList();
         }
 
-        [HttpPost(Name = "CreatePosts")]
-        public async Task<Post> Post(PostCreateDto postDto)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PostDto>> GetPost(Guid id)
+        {
+            var item = await _context.GetPostAsync(id);
+            if (item == null) return NotFound();
+            return ItemToDTO(item);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<PostDto>> Post(PostCreateDto postDto)
         {
             var user = new User
             {
@@ -41,25 +49,76 @@ namespace PostsAPI.Controllers
                 CreatedDate = DateTimeOffset.UtcNow
             };
 
-            var data = _grpc.ReturnAllComments();
-            Console.WriteLine(data);
+            await _userContext.CreateUserAsync(user);
+
+            var userItem = await _userContext.GetUserAsync(user.Id);
+
+            if(userItem == null) return NotFound("User not exists");
 
             var post = new Post
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 Title = postDto.Title,
-                Text = data,
+                Text = "Data",
                 CreatedDate = DateTimeOffset.UtcNow
             };
 
-            _logger.LogInformation("Data");
-
-
-            await _userContext.CreateUserAsync(user);
             await _context.CreatePostAsync(post);
 
-            return post;
+            return ItemToDTO(post);
         }
-    }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTodoItem(Guid id, PostUpdateDto postDTO)
+        {
+            var postItem = await _context.GetPostAsync(id);
+            if (postItem == null)
+            {
+                return NotFound();
+            }
+
+            var newPost = new Post
+            {
+                Id = id,
+                Title = postDTO.Title,
+                Text = postDTO.Text,
+                CreatedDate = DateTimeOffset.UtcNow
+            };
+
+            try
+            {
+                await _context.UpdatePostAsync(newPost);
+            }
+            catch
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTodoItem(Guid id)
+        {
+            var postItem = await _context.GetPostAsync(id);
+            if (postItem == null)
+            {
+                return NotFound();
+            }
+
+            await _context.DeletePostAsync(id);
+
+            return NoContent();
+        }
+
+        private static PostDto ItemToDTO(Post postItem) =>
+           new PostDto
+           {
+               Id = postItem.Id,
+               Title= postItem.Title,
+               Text = postItem.Text,
+               CreatedDate = postItem.CreatedDate
+           };
+        }
 }
