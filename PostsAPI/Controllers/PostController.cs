@@ -1,6 +1,7 @@
 ﻿using Core.Entities.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using PostsAPI.AsyncDataServices.Grpc.Client;
 using PostsAPI.Dto;
 
 namespace PostsAPI.Controllers
@@ -12,16 +13,18 @@ namespace PostsAPI.Controllers
         private readonly ILogger<PostsController> _logger;
         private readonly IPostRepository _context;
         private readonly IUserRepository _userContext;
+        private readonly IGrpcCommentClient _grpc;
 
-        public PostsController(ILogger<PostsController> logger, IPostRepository context, IUserRepository userContext)
+        public PostsController(ILogger<PostsController> logger, IPostRepository context, IUserRepository userContext, IGrpcCommentClient grpc)
         {
             _logger = logger;
             _context = context;
             _userContext = userContext;
+            _grpc = grpc;
         }
 
         [HttpGet(Name = "GetPosts")]
-        public async Task<IEnumerable<Post>>  Get()
+        public async Task<IEnumerable<Post>> Get()
         {
             return await _context.GetPostsAsync();
         }
@@ -38,14 +41,20 @@ namespace PostsAPI.Controllers
                 CreatedDate = DateTimeOffset.UtcNow
             };
 
+            var data = _grpc.ReturnAllComments();
+            Console.WriteLine(data);
+
             var post = new Post
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
                 Title = postDto.Title,
-                Text = postDto.Text,
+                Text = data,
                 CreatedDate = DateTimeOffset.UtcNow
             };
+
+            _logger.LogInformation("Data");
+
 
             await _userContext.CreateUserAsync(user);
             await _context.CreatePostAsync(post);

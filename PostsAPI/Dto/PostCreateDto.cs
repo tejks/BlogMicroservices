@@ -1,6 +1,4 @@
-﻿using Core.Entities.Models;
-
-namespace PostsAPI.Dto
+﻿namespace PostsAPI.Dto
 {
     public class PostCreateDto
     {

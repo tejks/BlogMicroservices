@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "CommentsAPI";
+
+service GrpcComment {
+    rpc GetAllComments (GetAllRequest) returns (CommentResponse);
+}
+
+message GetAllRequest {
+    string name = 1;
+}
+
+message GrpcCommentModel{
+    string name = 1;
+}
+
+message CommentResponse {
+   string comment = 1;
+}
