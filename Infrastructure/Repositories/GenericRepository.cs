@@ -8,50 +8,58 @@ namespace Infrastructure.Repositories;
 
 public abstract class GenericRepository<T> : IGenericRepository<T> where T : class, IEntityBase
 {
-    private readonly IMongoCollection<T> _dbSet;
+    private readonly IMongoDbContext _mongoContext;
     private readonly FilterDefinitionBuilder<T> _filterBuilder = Builders<T>.Filter;
+    private readonly IMongoCollection<T> _collection;
 
     protected GenericRepository(IMongoDbContext mongoContext)
     {
-        _dbSet = mongoContext.GetCollection<T>(typeof(T).Name);
+        _mongoContext = mongoContext;
+        // _collection = mongoContext.GetCollection<T>(typeof(T).Name); // Non-plural name
+        _collection = SetupCollection();
     }
 
+    private IMongoCollection<T> SetupCollection()
+    {
+        try
+        {
+            var pluralizedName = typeof(T).Name.EndsWith("s") ? typeof(T).Name : typeof(T).Name + "s";
+            var collection = _mongoContext.GetCollection<T>(pluralizedName);
+            return collection;
+        }
+        catch (MongoException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.Find(_filterBuilder.Empty).ToListAsync();
-    }
-
-    public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> filterExpression)
-    {
-        return await _dbSet.Find(filterExpression).ToListAsync();
+        return await _collection.Find(_filterBuilder.Empty).ToListAsync();
     }
 
     public async Task<T> GetByIdAsync(Guid id)
     {
         var filter = _filterBuilder.Eq("_id", id);
-        return await _dbSet.Find(filter).FirstOrDefaultAsync(); ;
+        return await _collection.Find(filter).FirstOrDefaultAsync();
     }
 
-    public async Task<T> GetByIdAsync(Guid id, Expression<Func<T, bool>> filterExpression)
+    public async Task<T> CreateAsync(T entity)
     {
-        var filter = _filterBuilder.Eq("_id", id) & filterExpression;
-        return await _dbSet.Find(filter).SingleOrDefaultAsync();
-    }
-
-    public async Task AddAsync(T entity)
-    {
-        await _dbSet.InsertOneAsync(entity);
+        await _collection.InsertOneAsync(entity);
+        var item = await GetByIdAsync(entity.Id);
+        return item;
     }
 
     public async Task UpdateAsync(T entity)
     {
         var filter = _filterBuilder.Eq("_id", entity.Id);
-        await _dbSet.ReplaceOneAsync(filter, entity);
+        await _collection.ReplaceOneAsync(filter, entity);
     }
 
     public async Task DeleteAsync(Guid id)
     {
         var filter = _filterBuilder.Eq("_id", id);
-        await _dbSet.DeleteOneAsync(filter);
+        await _collection.DeleteOneAsync(filter);
     }
 }
