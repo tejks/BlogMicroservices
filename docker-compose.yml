@@ -1,6 +1,17 @@
 version: '3.4'
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+        - 80:80
+        - 443:443
+    volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+        - commentsapi
+        - postsapi
+
   postsapi:
     image: ${DOCKER_REGISTRY-}postsapi
     build:
@@ -20,7 +31,7 @@ services:
      MONGO_URI: mongodb://mongo_db:27017
     depends_on:
      - mongo_db
-
+  
   mongo_db:
    container_name: db_container
    image: mongo:latest
