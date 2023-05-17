@@ -2,11 +2,6 @@
 
 namespace Core.Repositories;
 
-public interface IPostRepository
+public interface IPostRepository : IGenericRepository<Post>
 {
-    Task CreatePostAsync(Post post);
-    Task DeletePostAsync(Guid id);
-    Task<Post> GetPostAsync(Guid id);
-    Task<IEnumerable<Post>> GetPostsAsync();
-    Task UpdatePostAsync(Post post);
 }
