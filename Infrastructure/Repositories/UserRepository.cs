@@ -6,44 +6,18 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository : GenericRepository<User>, IUserRepository
 {
-    private readonly IMongoCollection<User> usersCollection;
-    private readonly FilterDefinitionBuilder<User> filterBuilder = Builders<User>.Filter;
-
-    public UserRepository(IMongoDbContext context)
+    private readonly FilterDefinitionBuilder<User> _filterBuilder = Builders<User>.Filter;
+    private readonly IMongoCollection<User> _collection;
+    public UserRepository(IMongoDbContext mongoContext) : base(mongoContext)
     {
-        usersCollection = context.Users;
+        _collection = mongoContext.Users;
     }
 
-    public async Task CreateUserAsync(User user)
+    public async Task<User> GetUserByEmailAsync(string email)
     {
-        await usersCollection.InsertOneAsync(user);
-    }
-
-    public async Task DeleteUserAsync(System.Guid id)
-    {
-        var filter = filterBuilder.Eq(user => user.Id, id);
-
-        await usersCollection.DeleteOneAsync(filter);
-    }
-
-    public async Task<User> GetUserAsync(System.Guid id)
-    {
-        var filter = filterBuilder.Eq(user => user.Id, id);
-
-        return await usersCollection.Find(filter).SingleOrDefaultAsync();
-    }
-
-    public async Task<IEnumerable<User>> GetUsersAsync()
-    {
-        return await usersCollection.Find(new BsonDocument()).ToListAsync();
-    }
-
-    public async Task UpdateUserAsync(User user)
-    {
-        var filter = filterBuilder.Eq(existingUser => existingUser.Id, user.Id);
-
-        await usersCollection.ReplaceOneAsync(filter, user);
+        var filter = _filterBuilder.Eq(x => x.Email, email);
+        return await _collection.Find(filter).FirstOrDefaultAsync();
     }
 }
