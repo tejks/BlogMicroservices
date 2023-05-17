@@ -1,6 +1,6 @@
 ﻿using Grpc.Net.Client;
 
-namespace PostsAPI.AsyncDataServices.Grpc.Client
+namespace PostsAPI.SyncDataServices.Grpc.Client
 {
     public class GrpcCommentClient : IGrpcCommentClient
     {

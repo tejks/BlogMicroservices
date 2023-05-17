@@ -14,11 +14,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F89CF690-FF25-44EE-A182-E546FB1533B0}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		nginx.conf = nginx.conf
 	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{92D406F2-D5E6-44FB-A5D7-1BED45A770EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommentsAPI", "CommentsAPI\CommentsAPI.csproj", "{8AC1160F-D7C9-4D16-85EF-195B4EA1781F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommentsAPI", "CommentsAPI\CommentsAPI.csproj", "{8AC1160F-D7C9-4D16-85EF-195B4EA1781F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -6,11 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using PostsAPI.AsyncDataServices.Grpc.Client;
-using AutoMapper;
-using Amazon.Runtime.Internal.Util;
-using static System.Net.Mime.MediaTypeNames;
-using System.IO;
+using PostsAPI.SyncDataServices.Grpc.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
