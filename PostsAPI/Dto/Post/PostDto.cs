@@ -1,11 +1,23 @@
-﻿namespace PostsAPI.Dto.Post
+﻿using Core.Entities;
+
+namespace PostsAPI.Dto.Post
 {
-    public class PostDto
+    public class PostDto : PostCreateDto, IEntityBase
     {
         public Guid Id { get; init; }
-        public string Title { get; init; }
-        public string Text { get; init; }
         public Guid UserId { get; init; }
         public DateTimeOffset CreatedDate { get; init; }
+        
+        public static PostDto PostToDto(Core.Entities.Models.Post post)
+        {
+            return new PostDto()
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Text = post.Text,
+                UserId = post.UserId,
+                CreatedDate = post.CreatedDate
+            };
+        }
     }
 }
