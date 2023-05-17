@@ -6,7 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using PostsAPI.AsyncDataServices.Grpc.Client;
+using PostsAPI.SyncDataServices.Grpc.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 

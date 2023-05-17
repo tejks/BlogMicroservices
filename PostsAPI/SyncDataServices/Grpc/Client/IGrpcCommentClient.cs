@@ -1,6 +1,6 @@
 ﻿using Core.Entities.Models;
 
-namespace PostsAPI.AsyncDataServices.Grpc.Client
+namespace PostsAPI.SyncDataServices.Grpc.Client
 {
     public interface IGrpcCommentClient
     {

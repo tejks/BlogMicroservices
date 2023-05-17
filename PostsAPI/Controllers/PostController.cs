@@ -1,7 +1,7 @@
 ﻿using Core.Entities.Models;
 using Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using PostsAPI.AsyncDataServices.Grpc.Client;
+using PostsAPI.SyncDataServices.Grpc.Client;
 using PostsAPI.Dto.Post;
 
 namespace PostsAPI.Controllers
@@ -26,8 +26,6 @@ namespace PostsAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostDto>>> GetPosts()
         {
-            var data = _grpc.ReturnAllComments();
-            Console.WriteLine(data);
             return (await _context.GetPostsAsync()).Select(x => ItemToDTO(x)).ToList();
         }
 
