@@ -6,6 +6,7 @@ public record User : IEntityBase
     public string FirstName { get; init; }
     public string LastName { get; init; }
     public string Email { get; init; }
+    public string Password { get; set; }
     public DateTimeOffset CreatedDate { get; init; }
 
     public IEnumerable<Comment> Comments { get; init; }
