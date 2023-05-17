@@ -6,7 +6,7 @@ using PostsAPI.Dto.Post;
 
 namespace PostsAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class PostsController : ControllerBase
     {
@@ -26,6 +26,8 @@ namespace PostsAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostDto>>> GetPosts()
         {
+            var data = _grpc.ReturnAllComments();
+            Console.WriteLine(data);
             return (await _context.GetPostsAsync()).Select(x => ItemToDTO(x)).ToList();
         }
 
