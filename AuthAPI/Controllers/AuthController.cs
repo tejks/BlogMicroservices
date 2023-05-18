@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using AuthAPI.Configuration;
 using AuthAPI.Dto;
 using AuthAPI.Models;
 using AuthAPI.Services;
@@ -12,17 +11,13 @@ namespace AuthAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly JwtSettings _jwtSettings;
-        private readonly ILogger _logger;
-        private readonly IJwtAuthService _jwtAuthService;
-        private readonly IUserService _userService ;
+        private readonly IUserService _userService;
+        private readonly IAccountService _accountService;
 
-        public AuthController(ILogger<AuthController> logger, JwtSettings jwtSettings, IJwtAuthService jwtAuthService, IUserService userService)
+        public AuthController( IUserService userService, IAccountService accountService)
         {
-            _logger = logger;
-            _jwtSettings = jwtSettings;
-            _jwtAuthService = jwtAuthService;
             _userService = userService;
+            _accountService = accountService;
         }
         
         [AllowAnonymous]
@@ -34,21 +29,18 @@ namespace AuthAPI.Controllers
                 return BadRequest(ModelState);
             }
             
-            var loginResult = await _jwtAuthService.Login(user);
+            var loginResult = await _accountService.Login(user);
             
             return loginResult is null ? Unauthorized() : Ok(loginResult);
         }
         
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]UserCreateDto user)
+        public async Task<IActionResult> Register([FromBody] UserCreateDto user)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var newUser = await _jwtAuthService.Register(user);
+            var newUser = await _accountService.Register(user);
 
             if (newUser is null)
             {
@@ -57,18 +49,14 @@ namespace AuthAPI.Controllers
 
             return Ok(newUser);
         }
-        
-        //Testowy
-        [HttpGet("GetCurrentUser")]
+
+        [HttpGet("current")]
         [Authorize(Policy = "Bearer")]
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
             var user = await _userService.GetUserByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
 
-            if (user is null)
-            {
-                return NotFound();
-            }
+            if (user is null) return NotFound();
             
             return user;
         }

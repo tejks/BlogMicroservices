@@ -2,6 +2,7 @@ using AuthAPI.Configuration;
 using AuthAPI.Services;
 using Core.Entities.Models;
 using Core.Repositories;
+using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
@@ -61,10 +62,17 @@ builder.Services.AddSingleton<JwtSettings>();
 builder.Services.ConfigureJwt(new JwtSettings(builder.Configuration));
 builder.Services.ConfigureCors();
 
+// Database
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Model services
 builder.Services.AddScoped<IUserService, UserService>();
+
+// Tool services
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IJwtAuthService, JwtAuthService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
