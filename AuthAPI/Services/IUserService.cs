@@ -1,11 +1,11 @@
 ﻿using AuthAPI.Dto;
-using Core.Repositories;
 
 namespace AuthAPI.Services;
 
-public interface IUserService: IGenericRepository<UserDto>
+public interface IUserService
 {
-    Task<UserDto> CreateAsync(UserCreateDto entity);
-    Task UpdateAsync(Guid id, UserCreateDto entity);
     Task<UserDto> GetUserByEmailAsync(string email);
+    Task<UserDto> CreateAsync(UserCreateDto entity);
+    Task<UserDto> UpdateAsync(Guid id, UserUpdateDto entity);
+    Task<UserDto> ChangePassword(Guid id, UserChangePasswordDto entity);
 }

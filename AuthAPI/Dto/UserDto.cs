@@ -1,11 +1,13 @@
-﻿using Core.Entities;
-using Core.Entities.Models;
+﻿using Core.Entities.Models;
 
 namespace AuthAPI.Dto;
 
-public class UserDto : UserCreateDto, IEntityBase
+public class UserDto
 {
     public Guid Id { get; init; }
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    public string Email { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
 
     public static UserDto UserToDto(User user)
@@ -14,9 +16,9 @@ public class UserDto : UserCreateDto, IEntityBase
         {
             Id = user.Id,
             Email = user.Email,
-            Password = user.Password,
             FirstName = user.FirstName,
-            LastName = user.LastName
+            LastName = user.LastName,
+            CreatedDate = user.CreatedDate,
         };
     }
 }

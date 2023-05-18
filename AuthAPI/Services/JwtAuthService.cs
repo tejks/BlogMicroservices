@@ -1,12 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AuthAPI.Dto;
-using AuthAPI.Models;
 using Core.Entities.Models;
-using Core.Repositories;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AuthAPI.Services;
@@ -14,52 +9,13 @@ namespace AuthAPI.Services;
 public class JwtAuthService : IJwtAuthService
 {
     private readonly IConfiguration _config;
-    private readonly IUserService _userService;
-    private UserDto _user;
 
-    public JwtAuthService(IConfiguration config, IUserService userService)
+    public JwtAuthService(IConfiguration config)
     {
         _config = config;
-        _userService = userService;
-    }
-
-    public async Task<AuthTokenResponse> Login(LoginUser loginUser)
-    {
-        _user = await _userService.GetUserByEmailAsync(loginUser.Email);
-            
-        if(_user == null)
-        {
-            return null;
-        }
-
-        if (loginUser.Email != _user.Email || loginUser.Password != _user.Password)
-        {
-            return null;
-        }
-
-        var token = await GenerateToken(loginUser);
-
-        return new AuthTokenResponse()
-        {
-            Token = token,
-            UserId = _user.Id,
-        };
     }
     
-    public async Task<UserDto> Register(UserCreateDto userCreateDto)
-    {
-        var emailCheck = await _userService.GetUserByEmailAsync(userCreateDto.Email);
-        if (emailCheck is not null)
-        {
-            return null;
-        }
-        
-        var result = await _userService.CreateAsync(userCreateDto);
-
-        return result;
-    }
-    
-    public Task<string> GenerateToken(LoginUser loginUser)
+    public string GenerateToken(User user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -67,7 +23,7 @@ public class JwtAuthService : IJwtAuthService
         
         var claims = new[]
         {
-            new Claim(ClaimTypes.Email, _user.Email)
+            new Claim(ClaimTypes.Email, user.Email)
         };
 
         var token = new JwtSecurityToken(
@@ -80,6 +36,6 @@ public class JwtAuthService : IJwtAuthService
         
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
         
-        return Task.FromResult(tokenString);
+        return tokenString;
     }
 }
