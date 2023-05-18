@@ -11,6 +11,7 @@ services:
     depends_on:
         - commentsapi
         - postsapi
+        - authapi
 
   postsapi:
     image: ${DOCKER_REGISTRY-}postsapi
