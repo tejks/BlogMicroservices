@@ -6,6 +6,8 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# certs
+RUN dotnet dev-certs https
 WORKDIR /src
 COPY ["CommentsAPI/CommentsAPI.csproj", "CommentsAPI/"]
 RUN dotnet restore "CommentsAPI/CommentsAPI.csproj"
@@ -18,5 +20,7 @@ RUN dotnet publish "CommentsAPI.csproj" -c Release -o /app/publish /p:UseAppHost
 
 FROM base AS final
 WORKDIR /app
+# certs
+COPY --from=publish /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CommentsAPI.dll"]

@@ -2,11 +2,7 @@
 
 namespace Core.Repositories;
 
-public interface IUserRepository
+public interface IUserRepository: IGenericRepository<User>
 {
-    Task CreateUserAsync(User user);
-    Task DeleteUserAsync(System.Guid id);
-    Task<User> GetUserAsync(System.Guid id);
-    Task<IEnumerable<User>> GetUsersAsync();
-    Task UpdateUserAsync(User user);
+    Task<User> GetUserByEmailAsync(string email);
 }

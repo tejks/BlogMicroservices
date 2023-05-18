@@ -39,11 +39,11 @@ namespace CommentsAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<CommentDto>> Post(CommentCreateDto commentDto)
         {
-            var userItem = await _userContext.GetUserAsync(commentDto.UserId);
+            var userItem = await _userContext.GetByIdAsync(commentDto.UserId);
 
             if (userItem == null) return NotFound("User not exists");
 
-            var postItem = await _postContext.GetPostAsync(commentDto.PostId);
+            var postItem = await _postContext.GetByIdAsync(commentDto.PostId);
 
             if (postItem == null) return NotFound("Post not exists");
 
