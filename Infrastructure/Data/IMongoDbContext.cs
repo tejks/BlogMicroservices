@@ -1,4 +1,5 @@
-﻿using Core.Entities.Models;
+﻿using AuthAPI.Models;
+using Core.Entities.Models;
 using MongoDB.Driver;
 
 namespace Infrastructure.Data
@@ -8,6 +9,7 @@ namespace Infrastructure.Data
         IMongoCollection<Comment> Comments { get; }
         IMongoCollection<Post> Posts { get; }
         IMongoCollection<User> Users { get; }
+        IMongoCollection<RefreshToken> RefreshTokens { get; }
         IMongoCollection<T> GetCollection<T>(string name);
     }
 }
