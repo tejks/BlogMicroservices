@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Core.Entities.Models;
+using Core.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -33,6 +35,10 @@ public static class Configure
             opt.AddPolicy("Email", policy =>
             {
                 policy.RequireClaim("email");
+            });
+            opt.AddPolicy("IsAdmin", policy =>
+            {
+                policy.RequireRole(Enum.GetName(Role.Administrator));
             });
         });
         
