@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using AuthAPI.Configuration;
 using AuthAPI.Models;
 using AuthAPI.Services;
+using Core.Configuration;
 using Core.Entities.Models;
 using Core.Repositories;
 using Core.Services;
@@ -77,9 +77,9 @@ builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 // Model services
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Tool services
+// Tool servicesc
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IJwtAuthService, JwtAuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
