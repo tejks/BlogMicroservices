@@ -1,8 +1,12 @@
-﻿using Core.Entities.Models;
+﻿using System.Security.Claims;
+using AuthAPI.Models;
+using Core.Entities.Models;
 
 namespace AuthAPI.Services;
 
 public interface IJwtAuthService
 {
-    string GenerateToken(User user);
+    string GenerateAccessToken(User user);
+    RefreshToken GenerateRefreshToken(User user);
+    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }

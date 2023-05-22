@@ -1,4 +1,6 @@
-﻿using AuthAPI.Dto;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using AuthAPI.Dto;
 using AuthAPI.Models;
 using Core.Entities.Models;
 using Core.Repositories;
@@ -12,30 +14,59 @@ namespace AuthAPI.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
         private readonly IUserService _userService;
+        private readonly ITokenRepository _tokenRepository;
 
-        public AccountService(IJwtAuthService jwtAuthService, IUserRepository userRepository, IPasswordService passwordService, IUserService userService)
+        public AccountService(IJwtAuthService jwtAuthService, IUserRepository userRepository, IPasswordService passwordService, IUserService userService, ITokenRepository tokenRepository)
         {
             _jwtAuthService = jwtAuthService;
             _userRepository = userRepository;
             _passwordService = passwordService;
             _userService = userService;
+            _tokenRepository = tokenRepository;
         }
 
-        public async Task<AuthTokenResponse?> Login(LoginUser loginUser)
+        public async Task<UserAuthResponse> Login(UserLoginDto userLoginDto)
         {
-            var user = await _userRepository.GetUserByEmailAsync(loginUser.Email);
-
-            if (user == null) return null;
-
-            if (!Verify(loginUser.Password, user)) return null;
-
-            var token = _jwtAuthService.GenerateToken(user);
-
-            return new AuthTokenResponse()
+            var user = await _userRepository.GetUserByEmailAsync(userLoginDto.Email);
+            var authModel = new UserAuthResponse() { IsAuthenticated = false };
+            
+            if (user == null)
             {
-                Token = token,
-                UserId = user.Id,
+                authModel.Message = $"Account with {userLoginDto.Email} doesn't exist.";
+                return authModel;
             };
+
+            if (!Verify(userLoginDto.Password, user))
+            {
+                authModel.Message = $"Incorrect credentials.";
+                return authModel;
+            };
+
+            var token = _jwtAuthService.GenerateAccessToken(user);
+
+            authModel.IsAuthenticated = true;
+            authModel.Message = "Logged in.";
+            authModel.Token = token;
+            authModel.Email = user.Email;
+            authModel.Role = user.Role;
+
+            if (user.RefreshTokens.Any(a => a.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive)!;
+                authModel.RefreshToken = activeRefreshToken.Token;
+                authModel.RefreshTokenExpiration = activeRefreshToken.Expires;
+            }
+            else
+            {
+                var refreshToken = _jwtAuthService.GenerateRefreshToken(user);
+                authModel.RefreshToken = refreshToken.Token;
+                authModel.RefreshTokenExpiration = refreshToken.Expires;
+
+                var newToken = await _tokenRepository.AddTokenAsync(refreshToken);
+                user.RefreshTokens.Add(newToken); 
+            }
+            
+            return authModel;
         }
 
         public async Task<UserDto?> Register(UserCreateDto userCreateDto)
@@ -65,6 +96,63 @@ namespace AuthAPI.Services
         private bool Verify(string password, User user)
         {
             return _passwordService.VerifyPassword(password, user.PasswordHash, Convert.FromHexString(user.PasswordSalt));
+        }
+        
+        public async Task<UserAuthResponse> RefreshToken(TokenRequestModel tokenRequestModel)
+        {
+            var authModel = new UserAuthResponse() { IsAuthenticated = false };
+
+            var refreshToken = await _tokenRepository.GetByTokenAsync(tokenRequestModel.RefreshToken);
+
+            if (refreshToken is null)
+            {
+                authModel.Message = $"The specified token does not exist.";
+                return authModel;
+            }
+            var user = await _userRepository.GetByIdAsync(refreshToken.UserId);
+
+            if (user is null)
+            {
+                authModel.Message = $"Invalid client request.";
+                return authModel;
+            }
+
+            if (!refreshToken.IsActive)
+            {
+                authModel.Message = $"Token expired.";
+                return authModel;
+            }
+            
+            //Revoke current refresh token
+            refreshToken.RevokedDate = DateTime.UtcNow;
+            await _tokenRepository.UpdateTokenAsync(refreshToken);
+            var newRefreshToken = _jwtAuthService.GenerateRefreshToken(user);
+            
+            var newToken = await _tokenRepository.AddTokenAsync(newRefreshToken);
+            user.RefreshTokens.Add(newToken);
+            
+            // Generate new jwt
+            authModel.IsAuthenticated = true;
+            authModel.Token = _jwtAuthService.GenerateAccessToken(user);
+            authModel.Email = user.Email;
+            authModel.Role = user.Role;
+            authModel.RefreshToken = newRefreshToken.Token;
+            authModel.RefreshTokenExpiration = newRefreshToken.Expires;
+            
+            return authModel;
+        }
+
+        public async Task<bool> RevokeToken(TokenRequestModel tokenRequestModel)
+        {
+            var refreshToken = await _tokenRepository.GetByTokenAsync(tokenRequestModel.RefreshToken);
+            
+            if (refreshToken is null) return false;
+            if (!refreshToken.IsActive) return false;
+            
+            refreshToken.RevokedDate = DateTime.UtcNow;
+            await _tokenRepository.UpdateTokenAsync(refreshToken);
+            
+            return true;
         }
     }
 }

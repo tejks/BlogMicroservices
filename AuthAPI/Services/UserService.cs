@@ -1,5 +1,6 @@
 ﻿using AuthAPI.Dto;
 using Core.Entities.Models;
+using Core.Enums;
 using Core.Repositories;
 using Core.Services;
 
@@ -46,6 +47,7 @@ public class UserService : IUserService
             FirstName = entity.FirstName,
             LastName = entity.LastName,
             Email = entity.Email,
+            Role = Role.User,
             PasswordHash = hash,
             PasswordSalt = Convert.ToHexString(salt),
             CreatedDate = DateTimeOffset.UtcNow
@@ -64,6 +66,7 @@ public class UserService : IUserService
         {
             Id = oldUserData.Id,
             Email = entity.Email,
+            Role = oldUserData.Role,
             PasswordHash = oldUserData.PasswordHash,
             PasswordSalt = oldUserData.PasswordSalt,
             FirstName = entity.FirstName,
@@ -86,11 +89,33 @@ public class UserService : IUserService
         {
             Id = oldUserData.Id,
             Email = oldUserData.Email,
+            Role = oldUserData.Role,
             PasswordHash = hash,
             PasswordSalt = Convert.ToHexString(salt),
             FirstName = oldUserData.FirstName,
             LastName = oldUserData.LastName,
             CreatedDate = oldUserData.CreatedDate
+        };
+
+        await _userRepository.UpdateAsync(user);
+
+        return UserDto.UserToDto(user);
+    }
+
+    public async Task<UserDto> ChangeRole(Guid id, Role role)
+    {
+        var oldUserData = await _userRepository.GetByIdAsync(id);
+        
+        var user = new User()
+        {
+            Id = oldUserData.Id,
+            Email = oldUserData.Email,
+            Role = role,
+            PasswordHash = oldUserData.PasswordHash,
+            PasswordSalt = oldUserData.PasswordSalt,
+            FirstName = oldUserData.FirstName,
+            LastName = oldUserData.LastName,
+            CreatedDate = oldUserData.CreatedDate,
         };
 
         await _userRepository.UpdateAsync(user);

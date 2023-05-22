@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization;
 using AuthAPI.Configuration;
+using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Entities.Models;
 using Core.Repositories;
@@ -15,7 +17,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // serialize enums as strings in api responses (e.g. Role)
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -65,6 +72,7 @@ builder.Services.ConfigureCors();
 // Database
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 
 // Model services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -94,6 +102,13 @@ BsonClassMap.RegisterClassMap<User>(cm =>
     cm.AutoMap();
     cm.UnmapMember(m => m.Comments);
     cm.UnmapMember(m => m.Posts);
+    cm.UnmapMember(m => m.RefreshTokens);
+});
+
+BsonClassMap.RegisterClassMap<RefreshToken>(cm =>
+{
+    cm.AutoMap();
+    cm.UnmapMember(m => m.User);
 });
 
 BsonClassMap.RegisterClassMap<Comment>(cm =>
