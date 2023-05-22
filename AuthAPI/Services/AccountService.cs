@@ -10,15 +10,15 @@ namespace AuthAPI.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly IJwtAuthService _jwtAuthService;
+        private readonly IJwtService _jwtAuthService;
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
         private readonly IUserService _userService;
         private readonly ITokenRepository _tokenRepository;
 
-        public AccountService(IJwtAuthService jwtAuthService, IUserRepository userRepository, IPasswordService passwordService, IUserService userService, ITokenRepository tokenRepository)
+        public AccountService(IJwtService jwtService, IUserRepository userRepository, IPasswordService passwordService, IUserService userService, ITokenRepository tokenRepository)
         {
-            _jwtAuthService = jwtAuthService;
+            _jwtAuthService = jwtService;
             _userRepository = userRepository;
             _passwordService = passwordService;
             _userService = userService;

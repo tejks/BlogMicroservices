@@ -8,7 +8,6 @@ using PostsAPI.SyncDataServices.Grpc.Client;
 namespace PostsAPI.Controllers
 {
     [ApiController]
-    [Authorize]
     [Route("api/v1/[controller]")]
     public class PostsController : ControllerBase
     {
@@ -30,57 +29,53 @@ namespace PostsAPI.Controllers
             return posts;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<ActionResult<PostDto>> GetPost(Guid id)
         {
             var post = await _postService.GetByIdAsync(id);
 
-            if (post is null)
-            {
-                return NotFound();
-            }
-
+            if (post is null) return NotFound();
+            
             return post;
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<PostDto>> Post(PostCreateDto postCreateDto)
         {
-            var userId = Guid.Empty;
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
-            if (userIdStr is not null)
-            {
-                userId = Guid.Parse(userIdStr);
-            }
             var newPost = await _postService.CreateAsync(userId, postCreateDto);
 
             return CreatedAtAction(nameof(GetPost), new {id = newPost.Id}, newPost);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> PutTodoItem(Guid id, PostCreateDto postUpdateDto)
         {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
             var post = await _postService.GetByIdAsync(id);
 
-            if (post is null)
-            {
-                return NotFound();
-            }
+            if (post is null) return NotFound();
+            if (!post.UserId.Equals(userId)) return Unauthorized(new { error_message = "The post does not belong to this user" });
 
             await _postService.UpdateAsync(id, postUpdateDto);
 
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> DeleteTodoItem(Guid id)
         {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
             var post = await _postService.GetByIdAsync(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
+
+            if (post is null) return NotFound();
+            if (!post.UserId.Equals(userId)) return Unauthorized(new { error_message = "The post does not belong to this user" });
 
             await _postService.DeleteAsync(id);
 

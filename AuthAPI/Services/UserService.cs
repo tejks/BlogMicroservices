@@ -39,7 +39,7 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(UserCreateDto entity)
     {
-        var hash = _passwordService.HashPasword(entity.Password, out var salt);
+        var hash = _passwordService.HashPassword(entity.Password, out var salt);
 
         var user = new User()
         {
@@ -83,7 +83,7 @@ public class UserService : IUserService
     {
         var oldUserData = await _userRepository.GetByIdAsync(id);
 
-        var hash = _passwordService.HashPasword(entity.NewPassword, out var salt);
+        var hash = _passwordService.HashPassword(entity.NewPassword, out var salt);
 
         var user = new User()
         {
