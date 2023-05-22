@@ -1,6 +1,7 @@
 using Core.Configuration;
 using Core.Entities.Models;
 using Core.Repositories;
+using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
@@ -29,7 +30,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Description = @"JWT Authorization header using the Bearer scheme.
               Enter 'Bearer' and then your token in the text input below.
-              Example: 'Bearer avbagags124214'",
+              Example: 'Bearer token'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -57,7 +58,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Auth API",
+        Title = "Posts API",
     });
 });
 
@@ -72,6 +73,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGrpcCommentClient, GrpcCommentClient>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
@@ -111,8 +113,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
