@@ -1,4 +1,6 @@
-﻿namespace AuthAPI.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace Core.Configuration;
 
 public class JwtSettings
 {
