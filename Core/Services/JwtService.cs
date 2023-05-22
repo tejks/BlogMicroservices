@@ -4,15 +4,16 @@ using System.Security.Cryptography;
 using System.Text;
 using AuthAPI.Models;
 using Core.Entities.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthAPI.Services;
+namespace Core.Services;
 
-public class JwtAuthService : IJwtAuthService
+public class JwtService : IJwtService
 {
     private readonly IConfiguration _config;
 
-    public JwtAuthService(IConfiguration config)
+    public JwtService(IConfiguration config)
     {
         _config = config;
     }
