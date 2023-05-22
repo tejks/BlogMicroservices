@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
-using Amazon.Runtime.Internal;
-using Core.Entities.Models;
-using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PostsAPI.Dto.Post;
 using PostsAPI.Services;
@@ -10,6 +8,7 @@ using PostsAPI.SyncDataServices.Grpc.Client;
 namespace PostsAPI.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/v1/[controller]")]
     public class PostsController : ControllerBase
     {
