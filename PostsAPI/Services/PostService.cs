@@ -7,15 +7,30 @@ namespace PostsAPI.Services;
 
 public class PostService: IPostService
 {
-    private readonly ILogger<PostService> _logger;
     private readonly IPostRepository _postRepository;
     
-    public PostService(ILogger<PostService> logger, IPostRepository postRepository)
+    public PostService(IPostRepository postRepository)
     {
-        _logger = logger;
         _postRepository = postRepository;
     }
-    
+
+    public async Task<IEnumerable<PostDto>> GetAllByUserIdAsync(Guid userId)
+    {
+        var posts = await _postRepository.GetAllAsync();
+        var userPosts = posts.Where(x => x.UserId.Equals(userId)).Select(PostDto.PostToDto).OrderByDescending(x => x.CreatedDate).ToList();
+
+        return userPosts;
+    }
+
+    public async Task<PostDto> GetUserLastPostAsync(Guid userId)
+    {
+        // Posts are already ordered descending
+        var posts = await _postRepository.GetAllAsync();
+        var lastPost = posts.Where(x => x.UserId.Equals(userId)).Select(PostDto.PostToDto).OrderByDescending(x => x.CreatedDate).Take(1).FirstOrDefault();
+        
+        return lastPost;
+    }
+
     public async Task<IEnumerable<PostDto>> GetAllAsync()
     {
         var posts = await _postRepository.GetAllAsync();
@@ -30,23 +45,6 @@ public class PostService: IPostService
         return post is null ? null : PostDto.PostToDto(post);
     }
 
-    public async Task<PostDto> CreateAsync(PostDto entity)
-    {
-        var post = new Post()
-        {
-            Id = Guid.NewGuid(),
-            Title = entity.Title,
-            Text = entity.Text,
-            UserId = entity.UserId,
-            CreatedDate = DateTimeOffset.UtcNow
-        };
-        
-        await _postRepository.CreateAsync(post);
-        var newPost = await _postRepository.GetByIdAsync(post.Id);
-
-        return PostDto.PostToDto(newPost);
-    }
-    
     public async Task<PostDto> CreateAsync(Guid userId, PostCreateDto entity)
     {
         var post = new Post()
@@ -63,25 +61,10 @@ public class PostService: IPostService
 
         return PostDto.PostToDto(newPost);
     }
-
-    public async Task UpdateAsync(PostDto entity)
+    
+    public async Task UpdateAsync(Guid postId, PostUpdateDto entity)
     {
-        var post = new Post()
-        {
-            Id = entity.Id,
-            Title = entity.Title,
-            Text = entity.Text,
-            UserId = entity.UserId,
-            CreatedDate = entity.CreatedDate
-        };
-
-        await _postRepository.UpdateAsync(post);
-    }
-
-
-    public async Task UpdateAsync(Guid id, PostCreateDto entity)
-    {
-        var oldPost = await GetByIdAsync(id);
+        var oldPost = await GetByIdAsync(postId);
         var post = new Post()
         {
             Id = oldPost.Id,
