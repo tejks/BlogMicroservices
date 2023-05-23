@@ -11,29 +11,25 @@ namespace PostsAPI.Controllers
     [Route("api/v1/[controller]")]
     public class PostsController : ControllerBase
     {
-        private readonly ILogger<PostsController> _logger;
         private readonly IPostService _postService;
         private readonly IGrpcCommentClient _grpc;
 
-        public PostsController(ILogger<PostsController> logger, IPostService postService, IGrpcCommentClient grpc)
+        public PostsController(IPostService postService, IGrpcCommentClient grpc)
         {
-            _logger = logger;
             _postService = postService;
             _grpc = grpc;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<PostDto>> GetPosts()
+        public async Task<IEnumerable<PostDto>> GetAllPosts()
         {
-            var posts = await _postService.GetAllAsync();
-            return posts;
+            return await _postService.GetAllAsync();
         }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<PostDto>> GetPost(Guid id)
         {
             var post = await _postService.GetByIdAsync(id);
-
             if (post is null) return NotFound();
             
             return post;
@@ -41,7 +37,7 @@ namespace PostsAPI.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<PostDto>> Post(PostCreateDto postCreateDto)
+        public async Task<ActionResult<PostDto>> PostPost(PostCreateDto postCreateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
@@ -52,7 +48,7 @@ namespace PostsAPI.Controllers
 
         [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> PutTodoItem(Guid id, PostCreateDto postUpdateDto)
+        public async Task<IActionResult> PutPost(Guid id, PostUpdateDto postUpdateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
@@ -68,7 +64,7 @@ namespace PostsAPI.Controllers
 
         [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> DeleteTodoItem(Guid id)
+        public async Task<IActionResult> DeletePost(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
