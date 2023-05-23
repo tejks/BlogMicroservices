@@ -4,6 +4,7 @@ using AuthAPI.Dto;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Enums;
+using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,13 +16,13 @@ namespace AuthAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAccountService _accountService;
-        private readonly IJwtAuthService _jwtAuthService;
+        private readonly IJwtService _jwtService;
 
-        public AuthController(IUserService userService, IAccountService accountService, IJwtAuthService jwtAuthService)
+        public AuthController(IUserService userService, IAccountService accountService, IJwtService jwtService)
         {
             _userService = userService;
             _accountService = accountService;
-            _jwtAuthService = jwtAuthService;
+            _jwtService = jwtService;
         }
         
         [AllowAnonymous]

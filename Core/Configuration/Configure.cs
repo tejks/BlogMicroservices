@@ -1,12 +1,13 @@
 ﻿using System.Text;
-using Core.Entities.Models;
 using Core.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace AuthAPI.Configuration;
+namespace Core.Configuration;
 
 public static class Configure
 {

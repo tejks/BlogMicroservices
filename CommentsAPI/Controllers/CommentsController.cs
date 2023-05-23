@@ -1,6 +1,8 @@
-﻿using CommentsAPI.Dto.Comment;
+﻿using System.Security.Claims;
+using CommentsAPI.Dto.Comment;
 using Core.Entities.Models;
 using Core.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommentsAPI.Controllers
@@ -11,14 +13,12 @@ namespace CommentsAPI.Controllers
     {
         private readonly ILogger<CommentsController> _logger;
         private readonly ICommentRepository _commentContext;
-        private readonly IUserRepository _userContext;
         private readonly IPostRepository _postContext;
 
-        public CommentsController(ILogger<CommentsController> logger, ICommentRepository commentContext, IUserRepository userContext, IPostRepository postContext)
+        public CommentsController(ILogger<CommentsController> logger, ICommentRepository commentContext, IPostRepository postContext)
         {
             _logger = logger;
             _commentContext = commentContext;
-            _userContext = userContext;
             _postContext = postContext;
         }
 
@@ -28,7 +28,7 @@ namespace CommentsAPI.Controllers
             return (await _commentContext.GetCommentsAsync()).Select(x => ItemToDTO(x)).ToList();
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<ActionResult<CommentDto>> GetComment(Guid id)
         {
             var item = await _commentContext.GetCommentAsync(id);
@@ -37,20 +37,18 @@ namespace CommentsAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<CommentDto>> Post(CommentCreateDto commentDto)
         {
-            var userItem = await _userContext.GetByIdAsync(commentDto.UserId);
-
-            if (userItem == null) return NotFound("User not exists");
-
             var postItem = await _postContext.GetByIdAsync(commentDto.PostId);
-
             if (postItem == null) return NotFound("Post not exists");
+            
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var post = new Comment
             {
                 Id = Guid.NewGuid(),
-                UserId = userItem.Id,
+                UserId = userId,
                 PostId = postItem.Id,
                 Text = commentDto.Text,
                 CreatedDate = DateTimeOffset.UtcNow
@@ -61,44 +59,41 @@ namespace CommentsAPI.Controllers
             return ItemToDTO(post);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> PutComment(Guid id, CommentUpdateDto commentDTO)
         {
-            var commentItem = await _commentContext.GetCommentAsync(id);
-            if (commentItem == null)
-            {
-                return NotFound();
-            }
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
+            var comment = await _commentContext.GetCommentAsync(id);
+            
+            if (comment == null) return NotFound();
+            if (!comment.UserId.Equals(userId)) return Unauthorized(new { error_message = "The comment does not belong to this user" });
 
             var newComment = new Comment
             {
-                Id = commentItem.Id,
+                Id = comment.Id,
                 Text = commentDTO.Text,
-                PostId = commentItem.PostId,
-                UserId = commentItem.UserId,
-                CreatedDate = commentItem.CreatedDate,
+                PostId = comment.PostId,
+                UserId = comment.UserId,
+                CreatedDate = comment.CreatedDate,
             };
-
-            try
-            {
-                await _commentContext.UpdateCommentAsync(newComment);
-            }
-            catch
-            {
-                return NotFound();
-            }
+            
+            await _commentContext.UpdateCommentAsync(newComment);
 
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> DeleteComment(Guid id)
         {
-            var commentItem = await _commentContext.GetCommentAsync(id);
-            if (commentItem == null)
-            {
-                return NotFound();
-            }
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
+            var comment = await _commentContext.GetCommentAsync(id);
+            
+            if (comment == null) return NotFound();
+            if (!comment.UserId.Equals(userId)) return Unauthorized(new { error_message = "The comment does not belong to this user" });
 
             await _commentContext.DeleteCommentAsync(id);
 

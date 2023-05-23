@@ -9,7 +9,7 @@ namespace Core.Services
         const int iterations = 350000;
         HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA512;
 
-        public string HashPasword(string password, out byte[] salt)
+        public string HashPassword(string password, out byte[] salt)
         {
             salt = RandomNumberGenerator.GetBytes(keySize);
             var hash = Rfc2898DeriveBytes.Pbkdf2(

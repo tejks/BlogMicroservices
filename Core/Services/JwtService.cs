@@ -1,18 +1,23 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Sockets;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using AuthAPI.Models;
+using Core.Configuration;
 using Core.Entities.Models;
+using JWT.Builder;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthAPI.Services;
+namespace Core.Services;
 
-public class JwtAuthService : IJwtAuthService
+public class JwtService : IJwtService
 {
     private readonly IConfiguration _config;
 
-    public JwtAuthService(IConfiguration config)
+    public JwtService(IConfiguration config)
     {
         _config = config;
     }
@@ -26,6 +31,7 @@ public class JwtAuthService : IJwtAuthService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
             new Claim("role", Enum.GetName(user.Role))
         };
 
@@ -85,5 +91,36 @@ public class JwtAuthService : IJwtAuthService
         }
         
         return principal;
+    }
+
+    public bool Verify(string token)
+    {
+        var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]);
+
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _config["JwtSettings:Issuer"],
+            ValidAudience = _config["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.FromSeconds(60)
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        SecurityToken validatedToken;
+        try
+        {
+            tokenHandler.ValidateToken(token, tokenValidationParameters, out validatedToken);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return validatedToken != null;
     }
 }

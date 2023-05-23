@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using AuthAPI.Configuration;
 using AuthAPI.Models;
 using AuthAPI.Services;
+using Core.Configuration;
 using Core.Entities.Models;
 using Core.Repositories;
 using Core.Services;
@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Description = @"JWT Authorization header using the Bearer scheme.
               Enter 'Bearer' and then your token in the text input below.
-              Example: 'Bearer avbagags124214'",
+              Example: 'Bearer token'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -79,7 +79,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 // Tool services
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IJwtAuthService, JwtAuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
