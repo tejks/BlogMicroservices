@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using CommentsAPI.Dto.Comment;
-using Core.Entities.Models;
+using CommentsAPI.Services;
 using Core.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,75 +11,56 @@ namespace CommentsAPI.Controllers
     [ApiController]
     public class CommentsController : ControllerBase
     {
-        private readonly ILogger<CommentsController> _logger;
-        private readonly ICommentRepository _commentContext;
+        private readonly ICommentService _commentService;
         private readonly IPostRepository _postContext;
 
-        public CommentsController(ILogger<CommentsController> logger, ICommentRepository commentContext, IPostRepository postContext)
+        public CommentsController(ICommentService commentService, IPostRepository postContext)
         {
-            _logger = logger;
-            _commentContext = commentContext;
+            _commentService = commentService;
             _postContext = postContext;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
+        public async Task<IEnumerable<CommentDto>> GetAllComments()
         {
-            return (await _commentContext.GetCommentsAsync()).Select(x => ItemToDTO(x)).ToList();
+            return await _commentService.GetAllAsync();
         }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<CommentDto>> GetComment(Guid id)
         {
-            var item = await _commentContext.GetCommentAsync(id);
-            if (item == null) return NotFound();
-            return ItemToDTO(item);
+            var comment = await _commentService.GetByIdAsync(id);
+            if (comment == null) return NotFound();
+            return comment;
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<CommentDto>> Post(CommentCreateDto commentDto)
+        public async Task<ActionResult<CommentDto>> PostComment(CommentCreateDto commentCreateDto)
         {
-            var postItem = await _postContext.GetByIdAsync(commentDto.PostId);
-            if (postItem == null) return NotFound("Post not exists");
-            
+            var postItem = await _postContext.GetByIdAsync(commentCreateDto.PostId);
+            if (postItem == null) return NotFound("Post doesn't exist");
+
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
+            var newComment = await _commentService.CreateAsync(userId, commentCreateDto);
 
-            var post = new Comment
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                PostId = postItem.Id,
-                Text = commentDto.Text,
-                CreatedDate = DateTimeOffset.UtcNow
-            };
-
-            await _commentContext.CreateCommentAsync(post);
-
-            return ItemToDTO(post);
+            return CreatedAtAction(nameof(GetComment), new {id = newComment.Id}, newComment);
         }
 
         [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> PutComment(Guid id, CommentUpdateDto commentDTO)
+        public async Task<IActionResult> PutComment(Guid id, CommentUpdateDto commentUpdateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
-            var comment = await _commentContext.GetCommentAsync(id);
-            
-            if (comment == null) return NotFound();
-            if (!comment.UserId.Equals(userId)) return Unauthorized(new { error_message = "The comment does not belong to this user" });
 
-            var newComment = new Comment
-            {
-                Id = comment.Id,
-                Text = commentDTO.Text,
-                PostId = comment.PostId,
-                UserId = comment.UserId,
-                CreatedDate = comment.CreatedDate,
-            };
+            var comment = await _commentService.GetByIdAsync(id);
+
+            if (comment == null) return NotFound();
+            if (!comment.UserId.Equals(userId))
+                return Unauthorized(new {error_message = "The comment does not belong to this user"});
             
-            await _commentContext.UpdateCommentAsync(newComment);
+            await _commentService.UpdateAsync(id, commentUpdateDto);
 
             return NoContent();
         }
@@ -89,25 +70,16 @@ namespace CommentsAPI.Controllers
         public async Task<IActionResult> DeleteComment(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
-            var comment = await _commentContext.GetCommentAsync(id);
-            
-            if (comment == null) return NotFound();
-            if (!comment.UserId.Equals(userId)) return Unauthorized(new { error_message = "The comment does not belong to this user" });
 
-            await _commentContext.DeleteCommentAsync(id);
+            var comment = await _commentService.GetByIdAsync(id);
+
+            if (comment == null) return NotFound();
+            if (!comment.UserId.Equals(userId))
+                return Unauthorized(new {error_message = "The comment does not belong to this user"});
+
+            await _commentService.DeleteAsync(id);
 
             return NoContent();
         }
-
-        private static CommentDto ItemToDTO(Comment commentItem) =>
-           new CommentDto
-           {
-               Id = commentItem.Id,
-               Text = commentItem.Text,
-               CreatedDate = commentItem.CreatedDate,
-               PostId = commentItem.PostId,
-               UserId = commentItem.UserId
-           };
-        }
+    }
 }
