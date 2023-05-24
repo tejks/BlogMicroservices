@@ -21,9 +21,9 @@ namespace PostsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<PostDto>> GetAllPosts()
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetAllPosts()
         {
-            return await _postService.GetAllAsync();
+            return Ok(await _postService.GetAllAsync());
         }
 
         [HttpGet("{id:guid}")]
@@ -32,7 +32,7 @@ namespace PostsAPI.Controllers
             var post = await _postService.GetByIdAsync(id);
             if (post is null) return NotFound();
             
-            return post;
+            return Ok(post);
         }
 
         [HttpPost]

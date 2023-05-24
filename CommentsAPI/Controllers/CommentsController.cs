@@ -21,9 +21,9 @@ namespace CommentsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<CommentDto>> GetAllComments()
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllComments()
         {
-            return await _commentService.GetAllAsync();
+            return Ok(await _commentService.GetAllAsync());
         }
 
         [HttpGet("{id:guid}")]
@@ -31,7 +31,7 @@ namespace CommentsAPI.Controllers
         {
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null) return NotFound();
-            return comment;
+            return Ok(comment);
         }
 
         [HttpPost]

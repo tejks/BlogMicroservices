@@ -1,10 +1,8 @@
-using System.Net;
 using System.Security.Claims;
 using AuthAPI.Dto;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Enums;
-using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,13 +14,11 @@ namespace AuthAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAccountService _accountService;
-        private readonly IJwtService _jwtService;
 
-        public AuthController(IUserService userService, IAccountService accountService, IJwtService jwtService)
+        public AuthController(IUserService userService, IAccountService accountService)
         {
             _userService = userService;
             _accountService = accountService;
-            _jwtService = jwtService;
         }
         
         [AllowAnonymous]
@@ -99,7 +95,7 @@ namespace AuthAPI.Controllers
 
             if (user is null) return NotFound();
             
-            return user;
+            return Ok(user);
         }
         
         [HttpPost("changeRole")]
