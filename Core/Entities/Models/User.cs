@@ -13,8 +13,6 @@ public record User : IEntityBase
     public string PasswordSalt { get; set; }
     public Role Role { get; set; }
     public DateTimeOffset CreatedDate { get; init; }
-
-    public IEnumerable<Comment> Comments { get; init; }
-    public IEnumerable<Post> Posts { get; init; }
+    
     public List<RefreshToken> RefreshTokens { get; set; } = new();
 }
