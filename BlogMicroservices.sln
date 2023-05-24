@@ -23,6 +23,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommentsAPI", "CommentsAPI\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthAPI", "AuthAPI\AuthAPI.csproj", "{C4A4A874-E0DE-4294-8852-F78A7E5A44D5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3E2A0691-6931-4D0F-98AF-623BB39B1D82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogMicroservices.Api.Tests", "BlogMicroservices.Api.Tests\BlogMicroservices.Api.Tests.csproj", "{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +57,10 @@ Global
 		{C4A4A874-E0DE-4294-8852-F78A7E5A44D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4A4A874-E0DE-4294-8852-F78A7E5A44D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4A4A874-E0DE-4294-8852-F78A7E5A44D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +71,7 @@ Global
 		{9594B7D1-07AE-49D2-B079-9599E23F1E1C} = {7F9F4217-5FF7-4988-8378-B3FFD4F7D48B}
 		{8AC1160F-D7C9-4D16-85EF-195B4EA1781F} = {7F9F4217-5FF7-4988-8378-B3FFD4F7D48B}
 		{C4A4A874-E0DE-4294-8852-F78A7E5A44D5} = {7F9F4217-5FF7-4988-8378-B3FFD4F7D48B}
+		{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7} = {3E2A0691-6931-4D0F-98AF-623BB39B1D82}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {72714F10-979B-40CD-920E-185485CDCDE1}
