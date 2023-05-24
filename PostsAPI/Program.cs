@@ -62,16 +62,16 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Add services to the container.
 builder.Services.AddSingleton<JwtSettings>();
 builder.Services.ConfigureJwt(new JwtSettings(builder.Configuration));
 builder.Services.ConfigureCors();
 
-// Add services to the container.
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IGrpcCommentClient, GrpcCommentClient>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
@@ -95,6 +95,7 @@ BsonClassMap.RegisterClassMap<User>(cm =>
     cm.AutoMap();
     cm.UnmapMember(m => m.Comments);
     cm.UnmapMember(m => m.Posts);
+    cm.UnmapMember(m => m.RefreshTokens);
 });
 
 BsonClassMap.RegisterClassMap<Comment>(cm =>

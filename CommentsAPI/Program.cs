@@ -10,6 +10,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System.Text.Json.Serialization;
+using CommentsAPI.Services;
 using CommentsAPI.SyncDataServices.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,29 +58,26 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "Posts API",
+        Title = "Comments API",
     });
 });
 
+// Add services to the container.
 builder.Services.AddSingleton<JwtSettings>();
 builder.Services.ConfigureJwt(new JwtSettings(builder.Configuration));
 builder.Services.ConfigureCors();
 
-// Add services to the container.
 builder.Services.AddGrpc(options =>
 {
     options.EnableDetailedErrors = true;
 });
+
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
@@ -102,6 +100,7 @@ BsonClassMap.RegisterClassMap<User>(cm =>
     cm.AutoMap();
     cm.UnmapMember(m => m.Comments);
     cm.UnmapMember(m => m.Posts);
+    cm.UnmapMember(m => m.RefreshTokens);
 });
 
 BsonClassMap.RegisterClassMap<Comment>(cm =>

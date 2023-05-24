@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Core.Entities.Models;
+﻿using Core.Entities.Models;
 using Core.Repositories;
 using Infrastructure.Data;
 
@@ -9,6 +8,5 @@ public class PostRepository : GenericRepository<Post>, IPostRepository
 {
     public PostRepository(IMongoDbContext mongoContext) : base(mongoContext)
     {
-        
     }
 }
