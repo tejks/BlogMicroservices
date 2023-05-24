@@ -5,14 +5,14 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using PostsAPI.Controllers;
 using PostsAPI.Dto.Post;
 using PostsAPI.Services;
 using PostsAPI.SyncDataServices.Grpc.Client;
 using Xunit;
+using Moq;
 
-namespace BlogMicroservices.Api.Tests.Controllers;
+namespace Tests.Controllers;
 
 public class PostControllerTests
 {

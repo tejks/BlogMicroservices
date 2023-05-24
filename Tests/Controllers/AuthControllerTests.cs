@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace BlogMicroservices.Api.Tests.Controllers;
+namespace Tests.Controllers;
 
 public class AuthControllerTests
 {

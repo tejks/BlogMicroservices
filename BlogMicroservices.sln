@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthAPI", "AuthAPI\AuthAPI.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3E2A0691-6931-4D0F-98AF-623BB39B1D82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogMicroservices.Api.Tests", "BlogMicroservices.Api.Tests\BlogMicroservices.Api.Tests.csproj", "{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{D6D6F199-53B7-4FC8-8BBD-8F68417E45B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
