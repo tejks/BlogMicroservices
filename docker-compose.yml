@@ -21,7 +21,7 @@ services:
     environment:
      MONGO_URI: mongodb://mongo_db:27017
     depends_on:
-     - mongo_db
+     - mongo_db_auth
 
   commentsapi:
     image: ${DOCKER_REGISTRY-}commentsapi
@@ -31,7 +31,7 @@ services:
     environment:
      MONGO_URI: mongodb://mongo_db:27017
     depends_on:
-     - mongo_db
+     - mongo_db_comment
   
   authapi:
     image: ${DOCKER_REGISTRY-}authapi
@@ -41,16 +41,36 @@ services:
     environment:
       MONGO_URI: mongodb://mongo_db:27017
     depends_on:
-      - mongo_db
+      - mongo_db_post
   
-  mongo_db:
-   container_name: db_container
+  mongo_db_auth:
+   container_name: db_container_auth
    image: mongo:latest
    restart: always
    ports:
       - '27018:27017'
    volumes:
-      - mongo_db:/data/db
+      - mongo_db_auth:/data/db
+        
+  mongo_db_post:
+    container_name: db_container_post
+    image: mongo:latest
+    restart: always
+    ports:
+      - '27019:27017'
+    volumes:
+      - mongo_db_post:/data/db
+        
+  mongo_db_comment:
+    container_name: db_container_comment
+    image: mongo:latest
+    restart: always
+    ports:
+      - '27020:27017'
+    volumes:
+      - mongo_db_comment:/data/db
 
 volumes:
-  mongo_db: {}
+  mongo_db_auth: {}
+  mongo_db_post: {}
+  mongo_db_comment: {}
