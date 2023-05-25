@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthAPI.Controllers
 {
-    [Route("api/password")]
+    [Route("api/v1/password")]
     [ApiController]
     public class PasswordController : ControllerBase
     {
@@ -18,7 +18,7 @@ namespace AuthAPI.Controllers
             _accountService = accountService;
         }
 
-        [HttpPost("change")]
+        [HttpPut("change")]
         [Authorize(Policy = "Bearer")]
         public async Task<IActionResult> ChangePassword(Guid id, [FromBody] UserChangePasswordDto dto)
         {

@@ -47,6 +47,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Seed database
+var context = app.Services.GetRequiredService<IMongoDbContext>();
+DbSeedData.SeedComments(context.Comments);
+
 app.MapGrpcService<GrpcCommentService>();
 
 app.UseHttpsRedirection();

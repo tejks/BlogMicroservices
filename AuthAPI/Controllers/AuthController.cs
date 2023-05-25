@@ -1,31 +1,27 @@
-using System.Net;
 using System.Security.Claims;
 using AuthAPI.AsyncDataService;
 using AuthAPI.Dto;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Enums;
-using Core.Services;
 using Infrastructure.AsyncDataServices.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthAPI.Controllers
 {
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IAccountService _accountService;
-        private readonly IJwtService _jwtService;
         private readonly IMessageBusAuthClient _messageBusClient;
 
-        public AuthController(IUserService userService, IAccountService accountService, IJwtService jwtService, IMessageBusAuthClient messageBusClient)
+        public AuthController(IUserService userService, IAccountService accountService, IMessageBusAuthClient messageBusClient)
         {
             _userService = userService;
             _accountService = accountService;
-            _jwtService = jwtService;
             _messageBusClient = messageBusClient;
         }
         
@@ -103,10 +99,10 @@ namespace AuthAPI.Controllers
 
             if (user is null) return NotFound();
             
-            return user;
+            return Ok(user);
         }
         
-        [HttpPost("changeRole")]
+        [HttpPut("changeRole")]
         [Authorize(Policy = "IsAdmin")]
         public async Task<IActionResult> ChangeUserRole(string email, Role role)
         {
@@ -125,11 +121,39 @@ namespace AuthAPI.Controllers
             return Ok(changed);
         }
         
-        [HttpDelete("deleteAccount")]
+        [HttpDelete("DeleteAccount")]
         [Authorize]
         public async Task<IActionResult> DeleteAccount()
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            await _userService.DeleteAsync(userId);
+            
+            var publishDeletePostDto = new UserDeletedPublisherDto()
+            {
+                userId = userId,
+                Event = "User_Deleted"
+            };
+            
+            try
+            {
+                _messageBusClient.PublishUserDeleteEvent(publishDeletePostDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+            }
+            
+            return Ok();
+        }
+        
+        [HttpDelete("DeleteUser")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+
+            if (role != "Administrator") return Unauthorized("You are not an admin");
 
             await _userService.DeleteAsync(userId);
             

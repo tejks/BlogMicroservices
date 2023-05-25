@@ -19,9 +19,9 @@ namespace CommentsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<CommentDto>> GetAllComments()
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllComments()
         {
-            return await _commentService.GetAllAsync();
+            return Ok(await _commentService.GetAllAsync());
         }
 
         [HttpGet("{id:guid}")]
@@ -29,7 +29,19 @@ namespace CommentsAPI.Controllers
         {
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null) return NotFound();
-            return comment;
+            return Ok(comment);
+        }
+        
+        [HttpGet("GetMyComments")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetMyComments()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var comments = await _commentService.GetAllByUserIdAsync(userId);
+            if (comments is null) return NotFound();
+            
+            return Ok(comments);
         }
 
         [HttpPost]
@@ -48,11 +60,12 @@ namespace CommentsAPI.Controllers
         public async Task<IActionResult> PutComment(Guid id, CommentUpdateDto commentUpdateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var role = User.FindFirstValue(ClaimTypes.Role);
 
             var comment = await _commentService.GetByIdAsync(id);
 
             if (comment == null) return NotFound();
-            if (!comment.UserId.Equals(userId))
+            if (!comment.UserId.Equals(userId) && role != "Administrator")
                 return Unauthorized(new {error_message = "The comment does not belong to this user"});
             
             await _commentService.UpdateAsync(id, commentUpdateDto);
@@ -65,11 +78,12 @@ namespace CommentsAPI.Controllers
         public async Task<IActionResult> DeleteComment(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var role = User.FindFirstValue(ClaimTypes.Role);
 
             var comment = await _commentService.GetByIdAsync(id);
 
             if (comment == null) return NotFound();
-            if (!comment.UserId.Equals(userId))
+            if (!comment.UserId.Equals(userId) && role != "Administrator")
                 return Unauthorized(new {error_message = "The comment does not belong to this user"});
 
             await _commentService.DeleteAsync(id);

@@ -66,6 +66,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Seed database
+var context = app.Services.GetRequiredService<IMongoDbContext>();
+DbSeedData.SeedUsers(context.Users);
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");

@@ -32,7 +32,7 @@ public class JwtService : IJwtService
         {
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
-            new Claim("role", Enum.GetName(user.Role))
+            new Claim(ClaimTypes.Role, Enum.GetName(user.Role))
         };
 
         var token = new JwtSecurityToken(
