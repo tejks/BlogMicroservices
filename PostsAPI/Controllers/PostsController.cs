@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
+using Infrastructure.AsyncDataServices.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PostsAPI.AsyncDataService;
 using PostsAPI.Dto.Post;
 using PostsAPI.Services;
 using PostsAPI.SyncDataServices.Grpc.Client;
@@ -13,11 +15,13 @@ namespace PostsAPI.Controllers
     {
         private readonly IPostService _postService;
         private readonly IGrpcCommentClient _grpc;
+        private readonly IMessageBusPostClient _messageBusClient;
 
-        public PostsController(IPostService postService, IGrpcCommentClient grpc)
+        public PostsController(IPostService postService, IGrpcCommentClient grpc, IMessageBusPostClient messageBusClient)
         {
             _postService = postService;
             _grpc = grpc;
+            _messageBusClient = messageBusClient;
         }
 
         [HttpGet]
@@ -74,6 +78,20 @@ namespace PostsAPI.Controllers
             if (!post.UserId.Equals(userId)) return Unauthorized(new { error_message = "The post does not belong to this user" });
 
             await _postService.DeleteAsync(id);
+            var publishDeletePostDto = new PostDeletedPublisherDto()
+            {
+                Id = id,
+                Event = "Post_Deleted"
+            };
+            
+            try
+            {
+                _messageBusClient.PublishPostDeleteEvent(publishDeletePostDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+            }
 
             return NoContent();
         }

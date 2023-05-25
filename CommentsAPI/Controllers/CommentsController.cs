@@ -12,12 +12,10 @@ namespace CommentsAPI.Controllers
     public class CommentsController : ControllerBase
     {
         private readonly ICommentService _commentService;
-        private readonly IPostRepository _postContext;
 
-        public CommentsController(ICommentService commentService, IPostRepository postContext)
+        public CommentsController(ICommentService commentService)
         {
             _commentService = commentService;
-            _postContext = postContext;
         }
 
         [HttpGet]
@@ -38,9 +36,6 @@ namespace CommentsAPI.Controllers
         [Authorize]
         public async Task<ActionResult<CommentDto>> PostComment(CommentCreateDto commentCreateDto)
         {
-            var postItem = await _postContext.GetByIdAsync(commentCreateDto.PostId);
-            if (postItem == null) return NotFound("Post doesn't exist");
-
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             
             var newComment = await _commentService.CreateAsync(userId, commentCreateDto);

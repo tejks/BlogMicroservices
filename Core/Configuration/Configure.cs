@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 
 namespace Core.Configuration;
@@ -39,7 +40,7 @@ public static class Configure
             });
             opt.AddPolicy("IsAdmin", policy =>
             {
-                policy.RequireRole(Enum.GetName(Role.Administrator));
+                policy.RequireRole(Enum.GetName(Role.Administrator) ?? string.Empty);
             });
         });
         
@@ -94,5 +95,46 @@ public static class Configure
                     },
                 };
             });
+    }
+
+    public static void ConfigureSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = @"JWT Authorization header using the Bearer scheme.
+              Enter 'Bearer' and then your token in the text input below.
+              Example: 'Bearer token'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
+
+                    },
+                    new List<string>()
+                }
+            });
+
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = $"{System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name}",
+            });
+        });
     }
 }
