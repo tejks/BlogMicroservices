@@ -5,8 +5,6 @@ namespace CommentsAPI.Services;
 
 public interface ICommentService
 {
-
-    
     Task<IEnumerable<CommentDto>> GetAllByUserIdAsync(Guid userId);
     Task<IEnumerable<CommentDto>> GetAllByPostIdAsync(Guid postId);
     Task<IEnumerable<CommentDto>> GetAllAsync();

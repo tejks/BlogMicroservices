@@ -7,7 +7,6 @@ namespace CommentsAPI.Services;
 
 public class CommentService: ICommentService
 {
-
     private readonly ICommentRepository _commentRepository;
     
     public CommentService(ICommentRepository commentRepository)
@@ -76,6 +75,7 @@ public class CommentService: ICommentService
 
         await _commentRepository.UpdateAsync(comment);
     }
+    
     public async Task DeleteAsync(Guid id)
     {
         await _commentRepository.DeleteAsync(id);
