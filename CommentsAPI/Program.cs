@@ -1,3 +1,5 @@
+using CommentsAPI.AsyncDataService;
+using CommentsAPI.EventProcessing;
 using Core.Configuration;
 using Core.Repositories;
 using Core.Services;
@@ -5,6 +7,7 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using CommentsAPI.Services;
 using CommentsAPI.SyncDataServices.Grpc;
+using Infrastructure.AsyncDataServices;
 using Infrastructure.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,10 +28,12 @@ builder.Services.ConfigureSwagger();
 var mongoDbSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 builder.Services.ConfigureMongo(mongoDbSettings);
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddTransient<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddTransient<IEventProcessor, EventProcessor>(); 
 
 // DataService
+builder.Services.AddHostedService<MessageBusCommentSubscriber>();
 builder.Services.AddGrpc(options =>
 {
     options.EnableDetailedErrors = true;
