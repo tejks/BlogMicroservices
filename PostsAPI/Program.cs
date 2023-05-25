@@ -1,12 +1,12 @@
 using Core.Configuration;
 using Core.Repositories;
 using Core.Services;
-using Infrastructure.AsyncDataServices;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using PostsAPI.SyncDataServices.Grpc.Client;
 using Infrastructure.Configurations;
 using PostsAPI.AsyncDataService;
+using PostsAPI.EventProcessing;
 using PostsAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,12 +27,14 @@ builder.Services.ConfigureSwagger();
 var mongoDbSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 builder.Services.ConfigureMongo(mongoDbSettings);
 builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddTransient<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddTransient<IEventProcessor, EventProcessor>(); 
 
 // DataService
 builder.Services.AddScoped<IGrpcCommentClient, GrpcCommentClient>();
 builder.Services.AddScoped<IMessageBusPostClient, MessageBusPostClient>();
+builder.Services.AddHostedService<MessageBusPostSubscriber>();
 
 var app = builder.Build();
 

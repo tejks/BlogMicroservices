@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using AuthAPI.AsyncDataService;
 using AuthAPI.Dto;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Enums;
+using Infrastructure.AsyncDataServices.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +16,13 @@ namespace AuthAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAccountService _accountService;
+        private readonly IMessageBusAuthClient _messageBusClient;
 
-        public AuthController(IUserService userService, IAccountService accountService)
+        public AuthController(IUserService userService, IAccountService accountService, IMessageBusAuthClient messageBusClient)
         {
             _userService = userService;
             _accountService = accountService;
+            _messageBusClient = messageBusClient;
         }
         
         [AllowAnonymous]
@@ -115,6 +119,32 @@ namespace AuthAPI.Controllers
             }
             
             return Ok(changed);
+        }
+        
+        [HttpDelete("deleteAccount")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            await _userService.DeleteAsync(userId);
+            
+            var publishDeletePostDto = new UserDeletedPublisherDto()
+            {
+                userId = userId,
+                Event = "User_Deleted"
+            };
+            
+            try
+            {
+                _messageBusClient.PublishUserDeleteEvent(publishDeletePostDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+            }
+            
+            return Ok();
         }
     }
 }

@@ -2,15 +2,15 @@
 using Core.Repositories;
 using Infrastructure.AsyncDataServices.Dto;
 
-namespace CommentsAPI.EventProcessing;
+namespace PostsAPI.EventProcessing;
 
 public class EventProcessor : IEventProcessor
 {
-    private readonly ICommentRepository _commentRepository;
+    private readonly IPostRepository _postRepository;
     
-    public EventProcessor(ICommentRepository commentRepository)
+    public EventProcessor(IPostRepository postRepository)
     {
-        _commentRepository = commentRepository;
+        _postRepository = postRepository;
     }
 
     public void ProcessEvent(string notificationMessage)
@@ -19,9 +19,6 @@ public class EventProcessor : IEventProcessor
 
         switch (eventType)
         {
-            case EventType.PostDeleted:
-                PostDeleteEvent(notificationMessage);
-                break;
             case EventType.UserDeleted:
                 UserDeleteEvent(notificationMessage);
                 break;
@@ -42,9 +39,6 @@ public class EventProcessor : IEventProcessor
         
         switch(eventType.Event)
         {
-            case "Post_Deleted":
-                Console.WriteLine("--> Post Delete Event Detected");
-                return EventType.PostDeleted;
             case "User_Deleted":
                 Console.WriteLine("--> User Delete Event Detected");
                 return EventType.UserDeleted;
@@ -54,38 +48,23 @@ public class EventProcessor : IEventProcessor
         }
     }
 
-    private void PostDeleteEvent(string postPublishedMessage)
-    {
-        var postPublishedDto = JsonSerializer.Deserialize<PostDeletedPublisherDto>(postPublishedMessage);
-
-        if (postPublishedDto is null) return;
-        
-        var commentsList = _commentRepository.GetCommentsByPostIdSync(postPublishedDto.Id);
-
-        foreach (var comment in commentsList)
-        {
-            _commentRepository.DeleteAsync(comment.Id);
-        }
-    }
-    
     private void UserDeleteEvent(string userPublishedMessage)
     {
         var userPublishedDto = JsonSerializer.Deserialize<UserDeletedPublisherDto>(userPublishedMessage);
 
         if (userPublishedDto is null) return;
         
-        var commentsList = _commentRepository.GetCommentsByUserIdSync(userPublishedDto.userId);
+        var commentsList = _postRepository.GetCommentsByUserIdSync(userPublishedDto.userId);
 
         foreach (var comment in commentsList)
         {
-            _commentRepository.DeleteAsync(comment.Id);
+            _postRepository.DeleteAsync(comment.Id);
         }
     }
 }
 
 internal enum EventType
 {
-    PostDeleted,
     UserDeleted,
     Undetermined
 }
