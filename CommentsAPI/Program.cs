@@ -7,7 +7,6 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using CommentsAPI.Services;
 using CommentsAPI.SyncDataServices.Grpc;
-using Infrastructure.AsyncDataServices;
 using Infrastructure.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);

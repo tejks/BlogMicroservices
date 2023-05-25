@@ -20,6 +20,12 @@ public class CommentRepository : GenericRepository<Comment>, ICommentRepository
         var filter = _filterBuilder.Eq(x => x.PostId, postId);
         return _collection.Find(filter).ToList();
     }
+    
+    public IEnumerable<Comment> GetCommentsByUserIdSync(Guid userId)
+    {
+        var filter = _filterBuilder.Eq(x => x.UserId, userId);
+        return _collection.Find(filter).ToList();
+    }
 
     public void DeleteCommentSync(Guid id)
     {

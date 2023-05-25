@@ -10,4 +10,5 @@ public interface IUserService
     Task<UserDto> UpdateAsync(Guid id, UserUpdateDto entity);
     Task<UserDto> ChangePassword(Guid id, UserChangePasswordDto entity);
     Task<UserDto> ChangeRole(Guid id, Role role);
+    Task DeleteAsync(Guid id);
 }

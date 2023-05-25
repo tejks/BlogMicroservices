@@ -6,4 +6,5 @@ public interface ICommentRepository: IGenericRepository<Comment>
 {
     IEnumerable<Comment> GetCommentsByPostIdSync(Guid postId);
     void DeleteCommentSync(Guid id);
+    IEnumerable<Comment> GetCommentsByUserIdSync(Guid userId);
 }

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using AuthAPI.AsyncDataService;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Core.Configuration;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Tool services
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+
+builder.Services.AddScoped<IMessageBusAuthClient, MessageBusAuthClient>();
 
 BsonClassMap.RegisterClassMap<User>(cm =>
 {

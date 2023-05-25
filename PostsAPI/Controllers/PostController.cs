@@ -55,7 +55,7 @@ namespace PostsAPI.Controllers
         public async Task<IActionResult> PutPost(Guid id, PostUpdateDto postUpdateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
+
             var post = await _postService.GetByIdAsync(id);
 
             if (post is null) return NotFound();
@@ -71,6 +71,9 @@ namespace PostsAPI.Controllers
         public async Task<IActionResult> DeletePost(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var role = User.FindFirstValue("role");
+            
+            Console.WriteLine(role);
             
             var post = await _postService.GetByIdAsync(id);
 
