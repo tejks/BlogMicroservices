@@ -11,6 +11,7 @@ using PostsAPI.Services;
 using PostsAPI.SyncDataServices.Grpc.Client;
 using Xunit;
 using Moq;
+using PostsAPI.AsyncDataService;
 
 namespace Tests.Controllers;
 
@@ -19,12 +20,14 @@ public class PostControllerTests
     private readonly PostsController _controller;
     private readonly Mock<IGrpcCommentClient> _grpcClientMock;
     private readonly Mock<IPostService> _postServiceMock;
+    private readonly Mock<IMessageBusPostClient> _messageBusClient;
 
     public PostControllerTests()
     {
         _postServiceMock = new Mock<IPostService>();
         _grpcClientMock = new Mock<IGrpcCommentClient>();
-        _controller = new PostsController(_postServiceMock.Object, _grpcClientMock.Object);
+        _messageBusClient = new Mock<IMessageBusPostClient>();
+        _controller = new PostsController(_postServiceMock.Object, _grpcClientMock.Object, _messageBusClient.Object);
     }
 
     #region GetAll tests
