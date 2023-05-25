@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AuthAPI.AsyncDataService;
 using AuthAPI.Controllers;
 using AuthAPI.Dto;
 using AuthAPI.Models;
@@ -15,12 +16,14 @@ public class AuthControllerTests
     private readonly Mock<IAccountService> _accountServiceMock;
     private readonly AuthController _controller;
     private readonly Mock<IUserService> _userServiceMock;
+    private readonly Mock<IMessageBusAuthClient> _messageBusClient;
 
     public AuthControllerTests()
     {
         _userServiceMock = new Mock<IUserService>();
         _accountServiceMock = new Mock<IAccountService>();
-        _controller = new AuthController(_userServiceMock.Object, _accountServiceMock.Object);
+        _messageBusClient = new Mock<IMessageBusAuthClient>();
+        _controller = new AuthController(_userServiceMock.Object, _accountServiceMock.Object, _messageBusClient.Object);
     }
 
     #region Register user tests

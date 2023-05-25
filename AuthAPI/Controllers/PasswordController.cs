@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthAPI.Controllers
 {
-    [Route("api/password")]
+    [Route("api/v1/password")]
     [ApiController]
     public class PasswordController : ControllerBase
     {

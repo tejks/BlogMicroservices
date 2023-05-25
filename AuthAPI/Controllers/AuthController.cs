@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthAPI.Controllers
 {
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -121,11 +121,39 @@ namespace AuthAPI.Controllers
             return Ok(changed);
         }
         
-        [HttpDelete("deleteAccount")]
+        [HttpDelete("DeleteAccount")]
         [Authorize]
         public async Task<IActionResult> DeleteAccount()
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            await _userService.DeleteAsync(userId);
+            
+            var publishDeletePostDto = new UserDeletedPublisherDto()
+            {
+                userId = userId,
+                Event = "User_Deleted"
+            };
+            
+            try
+            {
+                _messageBusClient.PublishUserDeleteEvent(publishDeletePostDto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+            }
+            
+            return Ok();
+        }
+        
+        [HttpDelete("DeleteUser")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+
+            if (role != "Administrator") return Unauthorized("You are not an admin");
 
             await _userService.DeleteAsync(userId);
             

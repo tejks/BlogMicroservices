@@ -38,6 +38,18 @@ namespace PostsAPI.Controllers
             
             return Ok(post);
         }
+        
+        [HttpGet("GetMyPosts")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<PostDto>>> GetMyPosts()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var posts = await _postService.GetAllByUserIdAsync(userId);
+            if (posts is null) return NotFound();
+            
+            return Ok(posts);
+        }
 
         [HttpPost]
         [Authorize]
@@ -55,11 +67,12 @@ namespace PostsAPI.Controllers
         public async Task<IActionResult> PutPost(Guid id, PostUpdateDto postUpdateDto)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var role = User.FindFirstValue(ClaimTypes.Role);
 
             var post = await _postService.GetByIdAsync(id);
 
             if (post is null) return NotFound();
-            if (!post.UserId.Equals(userId)) return Unauthorized(new { error_message = "The post does not belong to this user" });
+            if (!post.UserId.Equals(userId) && role != "Administrator") return Unauthorized(new { error_message = "The post does not belong to this user" });
 
             await _postService.UpdateAsync(id, postUpdateDto);
 
@@ -71,14 +84,14 @@ namespace PostsAPI.Controllers
         public async Task<IActionResult> DeletePost(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var role = User.FindFirstValue("role");
+            var role = User.FindFirstValue(ClaimTypes.Role);
             
             Console.WriteLine(role);
             
             var post = await _postService.GetByIdAsync(id);
 
             if (post is null) return NotFound();
-            if (!post.UserId.Equals(userId)) return Unauthorized(new { error_message = "The post does not belong to this user" });
+            if (!post.UserId.Equals(userId) && role != "Administrator") return Unauthorized(new { error_message = "The post does not belong to this user" });
 
             await _postService.DeleteAsync(id);
             var publishDeletePostDto = new PostDeletedPublisherDto()
