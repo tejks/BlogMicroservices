@@ -17,16 +17,13 @@ namespace Tests.Controllers;
 
 public class CommentControllerTests
 {
-    private readonly Mock<ICommentService> _commentServiceMock;
-
     private readonly CommentsController _controller;
-    private readonly Mock<IPostRepository> _postContextMock;
+    private readonly Mock<ICommentService> _commentServiceMock;
 
     public CommentControllerTests()
     {
         _commentServiceMock = new Mock<ICommentService>();
-        _postContextMock = new Mock<IPostRepository>();
-        _controller = new CommentsController(_commentServiceMock.Object, _postContextMock.Object);
+        _controller = new CommentsController(_commentServiceMock.Object);
     }
 
     #region GetAllComments tests
@@ -73,7 +70,7 @@ public class CommentControllerTests
             CreatedDate = DateTimeOffset.Now
         };
         
-        _postContextMock.Setup(context => context.GetByIdAsync(postId)).ReturnsAsync(existingPost);
+        // _postContextMock.Setup(context => context.GetByIdAsync(postId)).ReturnsAsync(existingPost);
 
         var userId = Guid.NewGuid();
         var newComment = new CommentDto
