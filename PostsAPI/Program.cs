@@ -1,10 +1,12 @@
 using Core.Configuration;
 using Core.Repositories;
 using Core.Services;
+using Infrastructure.AsyncDataServices;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using PostsAPI.SyncDataServices.Grpc.Client;
 using Infrastructure.Configurations;
+using PostsAPI.AsyncDataService;
 using PostsAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 
 // DataService
 builder.Services.AddScoped<IGrpcCommentClient, GrpcCommentClient>();
+builder.Services.AddScoped<IMessageBusPostClient, MessageBusPostClient>();
 
 var app = builder.Build();
 
