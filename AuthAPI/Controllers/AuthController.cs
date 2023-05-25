@@ -98,7 +98,7 @@ namespace AuthAPI.Controllers
             return Ok(user);
         }
         
-        [HttpPost("changeRole")]
+        [HttpPut("changeRole")]
         [Authorize(Policy = "IsAdmin")]
         public async Task<IActionResult> ChangeUserRole(string email, Role role)
         {
