@@ -89,14 +89,14 @@ Each service is implemented as a separate microservice and can communicate with 
 
 ## Endpoints
 
-- **Authentication Service**:
-  - Nginx URL Path: `http://localhost/api/v1/auth`
+- **Test Authentication Service**:
+  - URL Path: https://localhost:5005/swagger/index.html
 
-- **Post Service**:
-  - Nginx URL Path: `http://localhost/api/v1/posts`
+- **Test Post Service**:
+  - URL Path: https://localhost:5003/swagger/index.html
 
-- **Comment Service**:
-  - Nginx URL Path: `http://localhost/api/v1/comments`
+- **Test Comment Service**:
+  - URL Path: https://localhost:5001/swagger/index.html
 
 </br>
 
