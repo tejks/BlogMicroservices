@@ -1,5 +1,11 @@
-# Microservices Blog App
-
+</br>
+<div align="center">
+  <img src="https://github.com/tejks/BlogMicroservices/assets/50965095/d87a0c80-28bd-4d1c-b396-7486f5fe5c96" alt="logo"/>
+  
+  <h2 align="center">Microservices Blog App</h2>
+</div>
+</br>
+  
 This repository contains a model of a microservices-based blog application built using C# and Docker Compose. The purpose of this model is to showcase the architectural design and components of a typical microservices application.
 
 </br>
